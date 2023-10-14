@@ -1,0 +1,2 @@
+# sneak
+Had, v pythonu
