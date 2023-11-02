@@ -19,7 +19,9 @@ def onTick():
     pass
     
 
-game = ConAPI.Game()
+game = ConAPI.Game((600,400))
+
+
 game.screen.setBackgroundColor(base)
 game.events.onStart.subscribe(onStart)
 game.events.onExit.subscribe(onQuit)

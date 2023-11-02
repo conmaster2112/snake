@@ -1,39 +1,62 @@
+from typing import Any, Tuple, Callable
 import pygame as pg
 import math
-import asyncio
 
 pg.init()
 ARROW_DOWN = 1073741905
 ARROW_UP = 1073741906
 ARROW_LEFT = 1073741904
 ARROW_RIGHT = 1073741903
+
+class Color:
+    def __init__(self,r: int,g:int,b:int):
+        self._r = r
+        self._g = g
+        self._b = b
+    def toNativeColor(self) -> Tuple[int,int,int]:
+        return (self._r,self._g,self._b)
+    
+    @property
+    def r(self) -> int: 
+        return self._r
+    @property
+    def g(self) -> int: 
+        return self._g
+    @property
+    def b(self) -> int: 
+        return self._b
+
+    @r.setter
+    def r(self,v:int):
+        if(v < 0): self._r = 0
+        elif(v > 255): self._r = 255
+        else: self._r = v    
+    @g.setter
+    def g(self,v:int):
+        if(v < 0): self._g = 0
+        elif(v > 255): self._g = 255
+        else: self._g = v
+    @b.setter
+    def b(self,v:int):
+        if(v < 0): self._b = 0
+        elif(v > 255): self._b = 255
+        else: self._b = v
+
 class Screen:
-    def __init__(self, size):
+    def __init__(self, size: Tuple[int,int]):
         self.size = size
         self.screen = pg.display.set_mode(self.size)
         self.color = Color(230,230,230)
         self.fps = 20
-    def setBackgroundColor(self,color):
+    def setBackgroundColor(self,color: Color):
         self.color = color
-    def getScreen(self):
+    def getNativeScreen(self):
         return self.screen
-    def setTitle(self, title):
+    def setTitle(self, title: str):
         pg.display.set_caption(title)
     def __tick__(self):
         self.screen.fill(self.color.toNativeColor())
         pg.display.flip()
-
-class Renderer:
-    def __init__(self, screen):
-        self.screen = screen
-        self.entities = []
-    def addEntity(self, entity):
-        self.entities.append(entity)
-    def getEntities(self):
-        return self.entities
-    def flip(self):
-        for a in self.entities:
-            a.render(self.screen)
 class Entity:
     def __init__(self, type):
         self.type = type
@@ -41,6 +64,18 @@ class Entity:
         self.velocity = Vector2()
     def render(self,screen: Screen):
         pass
+class Renderer:
+    def __init__(self, screen: Screen):
+        self.screen = screen
+        self.entities = list[Entity]()
+    def addEntity(self, entity: Entity):
+        self.entities.append(entity)
+    def getEntities(self) -> list[Entity]:
+        return self.entities
+    def flip(self):
+        for a in self.entities:
+            a.render(self.screen)
+
 class ShapeTypes:
     CYRCLE = "cyrcle"
     RECT = "rectangle"
@@ -55,44 +90,11 @@ class BallEntity(Entity):
         self.radius = radius
     def render(self,screen: Screen):
         pg.draw.cyrcle(screen.getScreen(),self.color,self.location.toList(),self.radius)
-class Color:
-    def __init__(self,r,g,b):
-        self._r = r
-        self._g = g
-        self._b = b
-    def toNativeColor(self):
-        return (self._r,self._g,self._b)
-    
-    @property
-    def r(self): 
-        return self._r
-    @property
-    def g(self): 
-        return self._g
-    @property
-    def b(self): 
-        return self._b
-
-    @r.setter
-    def r(self,v):
-        if(v < 0): self._r = 0
-        elif(v > 255): self._r = 255
-        else: self._r = v    
-    @g.setter
-    def g(self,v):
-        if(v < 0): self._g = 0
-        elif(v > 255): self._g = 255
-        else: self._g = v
-    @b.setter
-    def b(self,v):
-        if(v < 0): self._b = 0
-        elif(v > 255): self._b = 255
-        else: self._b = v
 
 class Game:
-    def __init__(self):
+    def __init__(self, size: Tuple[int,int] = (600,40)):
         self.clock = pg.time.Clock()
-        self.screen = Screen((1200,800))
+        self.screen = Screen(size)
         self.events = Events()
         self.exit = False
         self.events.onExit.subscribe(self.onExit)
@@ -102,12 +104,19 @@ class Game:
             self.events.__tick__()
             if(self.exit):
                 return
+            self.runnables.__tick__()
             self.screen.__tick__()
             self.clock.tick(self.screen.fps)
     def onExit(self):
         self.exit = True
 
-
+class System:
+    def __init__(self) -> None:
+        self.__methodsRuns__ = set()
+        self.__methodsRunTimeours__ = set()
+        self.__intervals__ = set()
+    def run():
+        pass
 class Events:
     def __init__(self):
         self.onExit = Event()
@@ -122,12 +131,12 @@ class Events:
                 self.onKeyDown.execute(event.key)
         self.onTick.execute()
 class Event:
-    def __init__(self):
+    def __init__(self): 
         self.__methods__ = set()
-    def subscribe(self, delegate):
+    def subscribe(self, delegate: Callable[...,Any]):
         self.__methods__.add(delegate)
         return delegate
-    def unsubscribe(self, delegate):
+    def unsubscribe(self, delegate: Callable[...,Any]):
         self.__methods__.remove(delegate)
         return delegate
     def execute(self,*params):
