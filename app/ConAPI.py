@@ -10,7 +10,7 @@ ARROW_RIGHT = 1073741903
 class Screen:
     def __init__(self, size):
         self.size = size
-        self.screen = pg.display.set_mode(self.size)  
+        self.screen = pg.display.set_mode(self.size)
         self.color = Color(230,230,230)
         self.fps = 20
     def setBackgroundColor(self,color):
@@ -172,13 +172,3 @@ class Vector2:
     @staticmethod
     def divide(v1, scalar):
         return Vector2(v1.x / scalar, v1.y / scalar)
-
-    def __init__(self, fps = 60):
-        self.fps = fps
-        self.lastTime = asyncio.get_running_loop().time()
-    async def tick(self):
-        end_time = asyncio.get_running_loop().time()
-        elapsed_time = end_time - self.lastTime
-        delay_time = max(1/self.fps - elapsed_time, 0)
-        await asyncio.sleep(delay_time)
-        self.lastTime = asyncio.get_running_loop().time()
