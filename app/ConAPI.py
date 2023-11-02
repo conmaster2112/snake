@@ -10,7 +10,7 @@ ARROW_RIGHT = 1073741903
 class Screen:
     def __init__(self, size):
         self.size = size
-        self.screen = pg.display.set_mode(self.size)
+        self.screen = pg.display.set_mode(self.size)  
         self.color = Color(230,230,230)
         self.fps = 20
     def setBackgroundColor(self,color):
